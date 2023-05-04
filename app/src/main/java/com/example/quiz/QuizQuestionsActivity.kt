@@ -1,15 +1,21 @@
 package com.example.quiz
 
+import android.graphics.Color
 import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 
-class QuizQuestionsActivity : AppCompatActivity() {
+class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
+
+    private var currentPosition: Int = 1
+    private var questionList: ArrayList<Question>? = null
+    private var selectedAnswerOption: Int = 0
 
     private var tvQuestion: TextView? = null
     private var ivFlag: ImageView? = null
@@ -19,12 +25,10 @@ class QuizQuestionsActivity : AppCompatActivity() {
     private var tvOptionTwo: TextView? = null
     private var tvOptionThree: TextView? = null
     private var tvOptionFour: TextView? = null
-
-    var i = 0
+    private var btnSubmit: Button? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz_questions)
-        //Log.i("The size of the question list is: ", "${Constants.getQuestions().size}")
 
         tvQuestion = findViewById(R.id.tv_question)
         ivFlag = findViewById(R.id.iv_flag)
@@ -34,57 +38,112 @@ class QuizQuestionsActivity : AppCompatActivity() {
         tvOptionTwo = findViewById(R.id.tv_optionTwo)
         tvOptionThree = findViewById(R.id.tv_optionThree)
         tvOptionFour = findViewById(R.id.tv_optionFour)
+        btnSubmit = findViewById(R.id.btn_submit)
 
-        val questions = Constants.getQuestions()
+        questionList = Constants.getQuestions()
 
-        var currentposition = 1
+        setQuestion()
 
-        var question : Question = questions[currentposition - 1]
+        tvOptionOne?.setOnClickListener(this)
+        tvOptionTwo?.setOnClickListener(this)
+        tvOptionThree?.setOnClickListener(this)
+        tvOptionFour?.setOnClickListener(this)
+        btnSubmit?.setOnClickListener(this)
+    }
+    private fun setQuestion() {
+
+        val question:Question = questionList!![currentPosition - 1]
+
+        if (currentPosition == 10) {
+            btnSubmit?.text = "FINISH"
+        } else { btnSubmit?.text = "SUBMIT"}
 
         tvQuestion?.text = question.question
         ivFlag?.setImageResource(question.image)
-        pbProgress?.progress = (question.id)
-        tvProgress?.text = "${question.id} / ${pbProgress?.max}"
+        pbProgress?.progress = currentPosition
+        tvProgress?.text = "$currentPosition" + "/" + "${pbProgress?.max}"
         tvOptionOne?.text = question.optionOne
         tvOptionTwo?.text = question.optionTwo
         tvOptionThree?.text = question.optionThree
         tvOptionFour?.text = question.optionFour
     }
 
-    fun onOption(view: View) {
+    private fun selectedOption(tv: TextView, selectedOption: Int) {
 
-        var options = ArrayList<TextView?>()
+        defaultOptions()
 
-        options.add(tvOptionOne)
-        options.add(tvOptionTwo)
-        options.add(tvOptionThree)
-        options.add(tvOptionFour)
+        selectedAnswerOption = selectedOption
 
+        tv.setTypeface(tv.typeface, Typeface.BOLD)
+        tv.setTextColor(Color.parseColor("#000000"))
+        tv.background = ContextCompat.getDrawable(this, R.drawable.selected_option_border_bg)
 
-        for (i in options) {
-            if (i?.text == (view as TextView).text) {
-                i?.setTypeface(null, Typeface.BOLD)
-            } else {
-                i?.setTypeface(null, Typeface.NORMAL)
-            }
+    }
+    private fun defaultOptions() {
+
+        val options = ArrayList<TextView>()
+
+        tvOptionOne?.let {
+            options.add(0, it)
         }
 
-//        when ((view as TextView).text) {
-//            "tv_optionOne" -> { tvOptionOne.setTypeface(null, Typeface.BOLD)
-//                tvOptionTwo.setTypeface(null, Typeface.NORMAL)
-//                tvOptionThree.setTypeface(null, Typeface.NORMAL)
-//                tvOptionFour.setTypeface(null, Typeface.NORMAL)
-//            }
-//        }
-//        (view as TextView).setTypeface(null, Typeface.BOLD)
+        tvOptionTwo?.let {
+            options.add(1, it)
+        }
+
+        tvOptionThree?.let {
+            options.add(2, it)
+        }
+
+        tvOptionFour?.let {
+            options.add(3, it)
+        }
+
+        for (option in options) {
+            option.typeface = Typeface.DEFAULT
+            option.setTextColor(Color.parseColor("#7A8089"))
+            option.background = ContextCompat.getDrawable(this, R.drawable.default_option_border_bg)
+        }
     }
+    override fun onClick(view: View?) {
 
-    fun onSubmit(view: View) {
-        i++
-        onUpdate()
-    }
+        when (view?.id) {
 
-    private fun onUpdate() {
+            R.id.tv_optionOne -> {
+                tvOptionOne?.let {
+                    selectedOption(it, 1)
+                }
+            }
 
+            R.id.tv_optionTwo -> {
+                tvOptionTwo?.let {
+                    selectedOption(it, 2)
+                }
+            }
+
+            R.id.tv_optionThree -> {
+                tvOptionThree?.let {
+                    selectedOption(it, 3)
+                }
+            }
+
+            R.id.tv_optionFour -> {
+                tvOptionFour?.let {
+                    selectedOption(it, 4)
+                }
+            }
+
+            R.id.btn_submit -> {
+                btnSubmit?.let {
+                    if (currentPosition != 10) {
+                        currentPosition++
+                        defaultOptions()
+                        setQuestion()
+                    } else {
+                        finish()
+                    }
+                }
+            }
+        }
     }
 }
