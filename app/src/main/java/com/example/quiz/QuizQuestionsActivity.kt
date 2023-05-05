@@ -1,5 +1,6 @@
 package com.example.quiz
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
@@ -154,6 +155,8 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
                         }
 
                         else -> {
+                            val resultIntent = Intent(this, ResultActivity::class.java)
+                            startActivity(resultIntent)
                             finish()
                         }
 
