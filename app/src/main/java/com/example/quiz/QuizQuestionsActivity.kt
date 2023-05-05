@@ -52,11 +52,15 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
     }
     private fun setQuestion() {
 
-        val question:Question = questionList!![currentPosition - 1]
+        defaultOptions()
 
-        if (currentPosition == 10) {
+        if (currentPosition == questionList!!.size) {
             btnSubmit?.text = "FINISH"
-        } else { btnSubmit?.text = "SUBMIT"}
+        } else {
+            btnSubmit?.text = "SUBMIT"
+        }
+
+        val question:Question = questionList!![currentPosition - 1]
 
         tvQuestion?.text = question.question
         ivFlag?.setImageResource(question.image)
@@ -80,6 +84,11 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
 
     }
     private fun defaultOptions() {
+
+        tvOptionOne?.isClickable = true
+        tvOptionTwo?.isClickable = true
+        tvOptionThree?.isClickable = true
+        tvOptionFour?.isClickable = true
 
         val options = ArrayList<TextView>()
 
@@ -134,16 +143,64 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             R.id.btn_submit -> {
-                btnSubmit?.let {
-                    if (currentPosition != 10) {
-                        currentPosition++
-                        defaultOptions()
-                        setQuestion()
-                    } else {
-                        finish()
+
+                if (selectedAnswerOption == 0) {
+
+                    currentPosition++
+
+                    when {
+                        currentPosition <= questionList!!.size -> {
+                            setQuestion()
+                        }
+
+                        else -> {
+                            finish()
+                        }
+
                     }
+                } else {
+
+                    val question = questionList?.get(currentPosition - 1)
+
+                    if (question?.correctOption != selectedAnswerOption) {
+                        onAnswer(selectedAnswerOption, R.drawable.wrong_option_border_bg)
+                    }
+
+                    onAnswer(question!!.correctOption, R.drawable.correct_option_border_bg)
+
+                    if (currentPosition == questionList!!.size) {
+                        btnSubmit?.text = "FINISH"
+                    } else {
+                        btnSubmit?.text = "NEXT QUESTION"
+                    }
+
+                    selectedAnswerOption = 0
+
+                    tvOptionOne?.isClickable = false
+                    tvOptionTwo?.isClickable = false
+                    tvOptionThree?.isClickable = false
+                    tvOptionFour?.isClickable = false
+
                 }
             }
+        }
+    }
+
+    private fun onAnswer(selectedAnswer: Int, selectedBackground: Int) {
+
+        when (selectedAnswer) {
+        1 -> {
+            tvOptionOne?.background = ContextCompat.getDrawable(this, selectedBackground)
+        }
+        2 -> {
+            tvOptionTwo?.background = ContextCompat.getDrawable(this, selectedBackground)
+        }
+        3 -> {
+            tvOptionThree?.background = ContextCompat.getDrawable(this, selectedBackground)
+        }
+        4 -> {
+            tvOptionFour?.background = ContextCompat.getDrawable(this, selectedBackground)
+        }
         }
     }
 }
